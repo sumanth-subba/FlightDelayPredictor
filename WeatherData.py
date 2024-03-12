@@ -1,16 +1,26 @@
 import openmeteo_requests
 import csv
+import os
 import requests_cache
 import pandas as pd
 from retry_requests import retry
 from datetime import datetime
 
-excel_file_path = 'weather_data.xlsx'
+output_file_path = 'Flight_Info_and_Weather_Data.csv'
+flights_file_path = 'flights_sample_2m.csv'
 hourly_params = ["temperature_2m", "apparent_temperature", "rain", "wind_speed_10m", "wind_speed_100m", "cloud_cover", 
             "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high", "wind_direction_10m", "wind_direction_100m", "wind_gusts_10m",
             "snow_depth"]
 
-def get_hourly_weather_df(longitude, latitude, time):
+dep_headers = ["dep_temperature_2m", "dep_apparent_temperature", "dep_rain", "dep_wind_speed_10m", "dep_wind_speed_100m", "dep_cloud_cover", 
+            "dep_cloud_cover_low", "dep_cloud_cover_mid", "dep_cloud_cover_high", "dep_wind_direction_10m", "dep_wind_direction_100m", "dep_wind_gusts_10m",
+            "dep_snow_depth"]
+
+dest_headers = ["dest_temperature_2m", "dest_apparent_temperature", "dest_rain", "dest_wind_speed_10m", "dest_wind_speed_100m", "dest_cloud_cover", 
+            "dest_cloud_cover_low", "dest_cloud_cover_mid", "dest_cloud_cover_high", "dest_wind_direction_10m", "dest_wind_direction_100m", "dest_wind_gusts_10m",
+            "dest_snow_depth"]
+
+def get_hourly_weather_df(longitude, latitude, time, header_info):
     # Setup the Open-Meteo API client with cache and retry on error
     cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
     retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
@@ -44,7 +54,7 @@ def get_hourly_weather_df(longitude, latitude, time):
     )}
 
     for i in range(len(hourly_params)):
-        hourly_data[hourly_params[i]] = hourly.Variables(i).ValuesAsNumpy()
+        hourly_data[header_info[i]] = hourly.Variables(i).ValuesAsNumpy()
 
     hourly_dataframe = pd.DataFrame(data = hourly_data)
     hourly_dataframe['date'] = hourly_dataframe['date'].dt.strftime('%Y-%m-%d %H:%M:%S')
@@ -63,6 +73,7 @@ def get_airport_long_lat(airport_code):
 def convert_military_time(military_time, date):
     # get the year, month, date separately
     date_obj = datetime.strptime(date, "%Y-%m-%d")
+    military_time = military_time.rjust(4, '0')
 
     year = date_obj.year
     month = date_obj.month
@@ -86,30 +97,52 @@ def convert_military_time(military_time, date):
 
     return format_date_time
 
-def write_df_to_excel(hourly_dataframe):
+def write_df_to_excel(data_frame):
     try:
         print("Writing to file...")
-        exisiting_data = pd.read_excel(excel_file_path)
-        combined_data = pd.concat([exisiting_data, hourly_dataframe], ignore_index=True)
+        exisiting_data = pd.read_excel(output_file_path)
+        combined_data = pd.concat([exisiting_data, data_frame], ignore_index=True)
     except FileNotFoundError:
-        combined_data = hourly_dataframe
+        combined_data = data_frame
 
-    combined_data.to_excel(excel_file_path, index=False)
+    combined_data.to_excel(output_file_path, index=False)
 
-def main():
-    airport_code = "LGA"
-    date = "2022-07-20"
-    military_time = "1428"
+def append_weather_to_flights(start_row, end_row): #zero indexed
+    flights_df = pd.read_csv(flights_file_path)
 
-    time = convert_military_time(military_time, date)
-    
-    long, lat = get_airport_long_lat(airport_code)
-    
-    if long is not None and lat is not None:
-        df = get_hourly_weather_df(long, lat, time)
-        write_df_to_excel(df)
-    else:
-        print("Could not find long & lat of this airport code, skipping...")
+    flights_sub = flights_df.iloc[start_row:end_row]
+
+    for index, row in flights_sub.iterrows():
+        fl_date = row['FL_DATE']
+        origin = row['ORIGIN']
+        crs_dep_time = row['CRS_DEP_TIME']
+
+        dest = row['DEST']
+        crs_arr_time = row['CRS_ARR_TIME']
+
+        dep_time = convert_military_time(str(crs_dep_time), str(fl_date))
+        arr_time = convert_military_time(str(crs_arr_time), str(fl_date))
+
+        dep_long, dep_lat = get_airport_long_lat(origin)
+        arr_long, arr_lat = get_airport_long_lat(dest)
+
+        if dep_long is not None and dep_lat is not None:
+            dep_hourly_weather_df = get_hourly_weather_df(dep_long, dep_lat, dep_time, dep_headers)
+            arr_hourly_weather_df = get_hourly_weather_df(arr_long, arr_lat, arr_time, dest_headers)
+
+            dep_hourly_weather_df.index = [0]
+            arr_hourly_weather_df.index = [0]
+
+            combined_row = pd.concat([flights_df.loc[[index]].reset_index(drop=True), dep_hourly_weather_df, arr_hourly_weather_df], axis=1)
+        
+            # write combined df to excel files
+            with open(output_file_path, 'a', newline='') as file:
+                file_size = os.stat(output_file_path).st_size
+                is_empty = file_size <= 2
+                combined_row.to_csv(file, index=False, header=is_empty)
+
+def main():  
+    append_weather_to_flights(0,10)
 
 if __name__ == "__main__":
     main()
