@@ -7,7 +7,7 @@ from retry_requests import retry
 from datetime import datetime
 
 output_file_path = 'Flight_Info_and_Weather_Data.csv'
-flights_file_path = 'flights_sample_2m.csv'
+flights_file_path = 'flights_sample_3m.csv'
 hourly_params = ["temperature_2m", "apparent_temperature", "rain", "wind_speed_10m", "wind_speed_100m", "cloud_cover", 
             "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high", "wind_direction_10m", "wind_direction_100m", "wind_gusts_10m",
             "snow_depth"]
@@ -142,7 +142,7 @@ def append_weather_to_flights(start_row, end_row): #zero indexed
                 combined_row.to_csv(file, index=False, header=is_empty)
 
 def main():  
-    append_weather_to_flights(0,10)
+    append_weather_to_flights(10,20)
 
 if __name__ == "__main__":
     main()
