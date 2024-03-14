@@ -84,8 +84,10 @@ def convert_military_time(military_time, date):
     minutes = int(military_time[2:])
 
     # round hour up
-    if minutes > 30:
+    if minutes > 30 and hours < 23:
         hours += 1
+    elif minutes > 30 and hours >= 23:
+        hours = 0
     
     minutes = 0
 
