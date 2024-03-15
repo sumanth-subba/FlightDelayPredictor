@@ -7,7 +7,7 @@ from retry_requests import retry
 from datetime import datetime
 
 output_file_path = 'Flight_Info_and_Weather_Data.csv'
-flights_file_path = 'flights_sample_3m.csv'
+flights_file_path = 'cleaned_flight_info.csv'
 hourly_params = ["temperature_2m", "apparent_temperature", "rain", "wind_speed_10m", "wind_speed_100m", "cloud_cover", 
             "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high", "wind_direction_10m", "wind_direction_100m", "wind_gusts_10m",
             "snow_depth"]
