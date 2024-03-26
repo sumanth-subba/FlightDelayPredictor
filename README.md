@@ -58,3 +58,19 @@ Performs hyperparameter tuning for a Random Forest Regressor model using GridSea
 Tunes the max_depth and n_estimators hyperparameters using a grid of values
 Evaluates the best model on the test set using metrics like MSE, R-squared, and MAPE
 Prints the best hyperparameters and evaluation metrics for the tuned model
+
+
+### Ridge.ipynb:
+Read data from complete_flight_info_and_weather_data.csv file
+Cleanse data by removing origin/dest, converting TRUE/FALSE to boolean, converting flight date to year/month/day
+Split training, test data and trained ridge model
+Manually tested with different alpha parameters, best MSE found at alpha = 1
+Output the MSE, MAE, R2, and the selected predictors after executing predict on test set
+
+### Quadratic.ipynb:
+Read data from complete_flight_info_and_weather_data.csv file
+Cleanse data by removing origin/dest, converting TRUE/FALSE to boolean, converting flight date to year/month/day
+Split training, test data
+Create new features based on existing one using polynomial features
+Manually tested with different degree parameters
+Output the MSE, MAE, R2, and the selected predictors after executing predict on test set
