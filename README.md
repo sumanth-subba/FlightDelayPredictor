@@ -1,5 +1,5 @@
 # FlightDelayPredictor
-MSCI 446
+## MSCI 446
 
 
 ### WeatherData.py: 
@@ -26,9 +26,8 @@ Split training, test data and trained Linear SVR model
 Manually tested with different kernels
 Output the MSE, MAE, R2, and the selected predictors after executing predict on test set
 
-### Flight_data_preparation.ipynb : combining data from multiple data files and dropping unnecessary columns(features)
-
-
+### Flight_data_preparation.ipynb : 
+combining data from multiple data files and dropping unnecessary columns(features)
 
 ### Forward_subset_selection.ipynb: 
 Read data from “complete_flight_info_and weather_data.csv”
