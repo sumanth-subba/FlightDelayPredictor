@@ -73,11 +73,11 @@ For each origin and destination airport, we found their respective departure tim
 -Output the MSE, MAE, R2, and the selected predictors after executing predict on test set
 
 ### backward_subset_selection.ipynb: 
-Read data from “complete_flight_info_and weather_data.csv”
-Implements backward feature selection for linear regression
-Iteratively adds features that improve the cross-validated R-squared score
-Returns the selected features
+-Read data from “complete_flight_info_and weather_data.csv”
+-Implements backward feature selection for linear regression
+-Iteratively adds features that improve the cross-validated R-squared score
+-Returns the selected features
 
 ### boosting.ipynb: 
-Randomly generates multiple training sets from the data from “complete_flight_info_and weather_data.csv” data file and Each model is then used to predict on the test set, lastly, the average of the results is taken as the prediction of the gradient boosting model. 
-Calculates minimum test MSE, test R2, and test MAPE
+-Randomly generates multiple training sets from the data from “complete_flight_info_and weather_data.csv” data file and Each model is then used to predict on the test set, lastly, the average of the results is taken as the prediction of the gradient boosting model. 
+-Calculates minimum test MSE, test R2, and test MAPE
